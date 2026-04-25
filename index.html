@@ -99,6 +99,20 @@
 .inline-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
 .empty-filter{text-align:center;padding:2rem 1rem;color:var(--tx2);font-size:13px;background:var(--card);border-radius:var(--r);border:1px solid var(--bd);}
 
+/* STATS TABLE */
+.stats-table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bd);background:var(--card);margin-bottom:11px;}
+.stats-table{width:100%;border-collapse:collapse;font-size:13px;}
+.stats-table th{background:linear-gradient(120deg,#e91e63 0%,#00a3b4 100%);color:white;padding:10px 14px;text-align:left;font-size:11.5px;font-weight:700;letter-spacing:.4px;white-space:nowrap;}
+.stats-table th:last-child{text-align:center;}
+.stats-table td{padding:10px 14px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;}
+.stats-table tr:last-child td{border-bottom:none;}
+.stats-table tr:hover td{background:var(--cp-bg);}
+.stats-table td:last-child{text-align:center;font-weight:700;color:var(--cp);font-size:15px;}
+.stats-table .pk-cell{font-weight:600;}
+.stats-table .date-cell{color:var(--tx2);font-size:12.5px;}
+.stats-total td{background:#f0fbfc;font-weight:700;}
+.stats-total td:last-child{color:#e91e63;font-size:16px;}
+
 /* DOCTOR LIST */
 .bs-grid{display:flex;flex-direction:column;gap:8px;}
 .bs-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:12px 15px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s,background .15s;}
@@ -227,6 +241,7 @@
     <p class="sec-lbl">Tổng quan</p>
     <div class="stats-row" id="stats-row"></div>
     <div id="chart-container"></div>
+    <div id="stats-section"></div>
     <div id="bs-section"></div>
     <p class="sec-lbl" style="margin-top:1.25rem">Chi tiết câu hỏi</p>
     <div id="q-container"></div>
@@ -541,6 +556,7 @@ function render(rows, fields){
 
   // Timeline
   if(tsField)renderTimeline(rows,cc);
+  renderStatsTable(rows);
   renderDoctorList(rows, dataFields);
 
   // Each question
@@ -671,6 +687,51 @@ function renderTxt(vals,container,lim){
 }
 
 /* ── AUTO-RESTORE ── */
+/* ── STATS TABLE ── */
+function renderStatsTable(rows){
+  var sec=document.getElementById('stats-section');
+  sec.innerHTML='';
+  if(!rows||rows.length===0)return;
+
+  // Group by [pkField + tsField]
+  var groups={};
+  rows.forEach(function(r){
+    var pk=pkField?(r[pkField]||'Chưa điền').trim():'Tất cả';
+    var dtRaw=tsField?(r[tsField]||'').trim():''; var dt=dtRaw.split(' ')[0]; // chỉ lấy ngày, bỏ giờ
+    var key=pk+'|||'+dt;
+    if(!groups[key])groups[key]={pk:pk,date:dt,count:0};
+    groups[key].count++;
+  });
+
+  // Sort: date desc first, then pk asc
+  var entries=Object.values(groups).sort(function(a,b){
+    var da=parseDateStr(a.date),db=parseDateStr(b.date);
+    if(!da&&!db)return 0; if(!da)return 1; if(!db)return -1;
+    if(db-da!==0)return db-da;
+    return a.pk.localeCompare(b.pk,'vi');
+  });
+
+  var totalBS=entries.reduce(function(s,e){return s+e.count;},0);
+
+  var wrap=document.createElement('div');
+  wrap.innerHTML='<p class="sec-lbl" style="margin-top:1.25rem;margin-bottom:10px">Thống kê</p>';
+
+  var tableWrap=document.createElement('div');
+  tableWrap.className='stats-table-wrap';
+
+  var html='<table class="stats-table"><thead><tr><th>Tên Phòng khám</th><th>Ngày làm việc</th><th>Số BS tham gia</th></tr></thead><tbody>';
+  entries.forEach(function(e){
+    html+='<tr><td class="pk-cell">'+escH(e.pk)+'</td><td class="date-cell">'+escH(e.date)+'</td><td>'+e.count+'</td></tr>';
+  });
+  // Total row
+  html+='<tr class="stats-total"><td colspan="2">Tổng cộng</td><td>'+totalBS+'</td></tr>';
+  html+='</tbody></table>';
+
+  tableWrap.innerHTML=html;
+  wrap.appendChild(tableWrap);
+  sec.appendChild(wrap);
+}
+
 /* ── DOCTOR LIST ── */
 function renderDoctorList(rows, dataFields){
   var sec=document.getElementById('bs-section');
