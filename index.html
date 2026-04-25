@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>UPSELL ÁI NGHĨA</title>
+<style>
+:root{
+  --cp:#00a3b4;--cp-bg:#e6f7f9;--cp-dk:#007a88;
+  --acc:#e91e63;--acc-bg:#fde8f0;
+  --bg:#f8f9fb;--card:#fff;
+  --tx:#1a1a2e;--tx2:#6b7280;--bd:#dde6e8;
+  --r:13px;--rl:20px;--font:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}html{-webkit-text-size-adjust:100%;}body{font-family:var(--font);background:var(--bg);color:var(--tx);min-height:100vh;}
+.screen{display:none;}.screen.active{display:block;}
+#sl{display:none;}#sl.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;}
+#sc.active{display:flex;flex-direction:column;min-height:100vh;padding:2.5rem 1.25rem;align-items:center;justify-content:center;}
+
+/* CONFIG */
+.logo-wrap{width:62px;height:62px;background:linear-gradient(135deg,#e91e63,#00a3b4);border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;}
+.logo-wrap svg{width:32px;height:32px;fill:white;}
+.cfg-box{width:100%;max-width:460px;background:var(--card);border-radius:var(--rl);padding:1.75rem 1.5rem 1.5rem;border:1px solid var(--bd);}
+.cfg-box h1{font-size:21px;font-weight:700;margin-bottom:5px;}
+.cfg-desc{font-size:13.5px;color:var(--tx2);margin-bottom:1.5rem;line-height:1.55;}
+.fl{font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--tx2);display:block;margin-bottom:6px;}
+.fi{width:100%;padding:11px 14px;border:1.5px solid var(--bd);border-radius:var(--r);font-size:14px;font-family:var(--font);color:var(--tx);background:var(--bg);transition:border-color .2s;margin-bottom:12px;}
+.fi:focus{outline:none;border-color:var(--cp);}.fi::placeholder{color:var(--tx2);opacity:.7;}
+.btn-main{width:100%;padding:13px;background:linear-gradient(120deg,#e91e63,#00a3b4);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);transition:opacity .15s,transform .1s;margin-top:2px;}
+.btn-main:hover{opacity:.9;}.btn-main:active{transform:scale(.98);}
+.hint{margin-top:1rem;padding:12px 14px;background:var(--cp-bg);border-radius:10px;font-size:12.5px;color:var(--cp-dk);line-height:1.65;border-left:3px solid var(--cp);}
+.hint strong{font-weight:600;}
+.err{display:none;margin-top:10px;padding:10px 14px;background:#fff3f0;border-left:3px solid var(--acc);border-radius:8px;font-size:13px;color:#a03010;line-height:1.5;}
+.err.on{display:block;}
+
+/* SPINNER */
+.spin{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--cp);border-radius:50%;animation:sp .75s linear infinite;}
+.ltxt{font-size:14px;color:var(--tx2);}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+/* HEADER */
+.sticky-top{position:sticky;top:0;z-index:20;}
+.hdr{background:linear-gradient(120deg,#e91e63 0%,#00a3b4 100%);padding:1rem 1.25rem .9rem;color:white;}
+.hdr h2{font-size:17px;font-weight:700;}.hdr .hsub{font-size:12px;opacity:.75;margin-top:2px;}
+.hdr-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.btn-hdr{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:white;padding:5px 11px;border-radius:20px;font-size:11.5px;cursor:pointer;font-family:var(--font);white-space:nowrap;flex-shrink:0;margin-top:1px;}
+.btn-hdr:hover{background:rgba(255,255,255,.3);}
+
+/* FILTER BAR */
+.filter-bar{background:#007a88;padding:.7rem 1.25rem .85rem;}
+.filter-row{display:flex;gap:8px;align-items:center;}
+.filter-wrap{flex:1;min-width:0;position:relative;}
+.filter-lbl{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:4px;}
+.fsel{width:100%;padding:8px 28px 8px 10px;border:1px solid rgba(255,255,255,.25);border-radius:9px;background:rgba(255,255,255,.95);color:var(--tx);font-size:13px;font-family:var(--font);cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a7267'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;}
+.fsel:focus{outline:none;border-color:rgba(255,255,255,.6);}
+.fsel:disabled{opacity:.5;cursor:default;}
+.filter-badge{display:none;align-items:center;justify-content:center;width:20px;height:20px;background:var(--acc);color:white;border-radius:50%;font-size:11px;font-weight:700;flex-shrink:0;margin-top:14px;}
+.filter-badge.on{display:flex;}
+.btn-clear{display:none;align-items:center;gap:4px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;font-family:var(--font);margin-top:14px;flex-shrink:0;}
+.btn-clear.on{display:flex;}
+.btn-clear:hover{background:rgba(255,255,255,.25);}
+
+/* BODY */
+.dbody{padding:1rem 1.25rem 3rem;}
+.sec-lbl{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--tx2);margin-bottom:10px;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1.5rem;}
+.scard{background:var(--card);border-radius:var(--r);padding:13px 15px;border:1px solid var(--bd);}
+.scard-lbl{font-size:11.5px;color:var(--tx2);margin-bottom:4px;}.scard-val{font-size:27px;font-weight:700;line-height:1;color:var(--tx);}
+.scard.active{border-color:var(--acc);background:var(--acc-bg);}
+.scard.active .scard-lbl{color:#c0134e;}
+.scard.active .scard-val{color:#c0134e;}
+
+/* QUESTION CARDS */
+.qc{background:var(--card);border-radius:var(--r);padding:1rem 1.2rem;border:1px solid var(--bd);margin-bottom:11px;}
+.qt{font-size:14px;font-weight:600;color:var(--tx);line-height:1.4;margin-bottom:3px;}
+.qm{font-size:11.5px;color:var(--tx2);margin-bottom:.85rem;}
+
+/* BARS */
+.hbars{display:flex;flex-direction:column;gap:10px;}
+.hb-top{display:flex;justify-content:space-between;font-size:12.5px;color:var(--tx);margin-bottom:4px;line-height:1.35;}
+.hb-cnt{color:var(--tx2);font-size:11.5px;white-space:nowrap;margin-left:8px;flex-shrink:0;}
+.hb-tr{height:7px;background:var(--bg);border-radius:4px;overflow:hidden;}
+.hb-fi{height:100%;background:linear-gradient(90deg,#00a3b4,#00c8dc);border-radius:4px;transition:width .7s cubic-bezier(.22,1,.36,1);}
+
+/* TEXT */
+.tx-list{display:flex;flex-direction:column;gap:8px;}
+.tx-item{padding:9px 12px;background:var(--bg);border-radius:10px;font-size:13px;line-height:1.55;border-left:3px solid var(--acc);}
+
+/* RATING */
+.rat-big{display:flex;align-items:baseline;gap:6px;margin-bottom:10px;}
+.rat-n{font-size:42px;font-weight:700;color:var(--acc);line-height:1;}.rat-d{font-size:16px;color:var(--tx2);}
+
+/* MISC */
+.show-more{display:block;width:100%;margin-top:8px;padding:8px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;font-size:12.5px;color:var(--tx2);cursor:pointer;font-family:var(--font);}
+.note{font-size:11.5px;color:var(--tx2);margin-top:6px;}
+.footer{text-align:center;font-size:12px;color:var(--tx2);margin-top:1.75rem;}
+.inline-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
+.empty-filter{text-align:center;padding:2rem 1rem;color:var(--tx2);font-size:13px;background:var(--card);border-radius:var(--r);border:1px solid var(--bd);}
+
+/* DOCTOR LIST */
+.bs-grid{display:flex;flex-direction:column;gap:8px;}
+.bs-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:12px 15px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s,background .15s;}
+.bs-card:hover{border-color:var(--acc);background:var(--acc-bg);}
+.bs-name{font-size:13.5px;font-weight:600;color:var(--tx);}
+.bs-meta{font-size:11.5px;color:var(--tx2);margin-top:2px;}
+.bs-arrow{color:var(--acc);font-size:18px;flex-shrink:0;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-end;}
+.modal-overlay.open{display:flex;}
+.modal-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;animation:slideUp .25s cubic-bezier(.22,1,.36,1);}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.modal-hdr{padding:1rem 1.25rem .9rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-title{font-size:15px;font-weight:700;color:var(--tx);}
+.modal-sub{font-size:12px;color:var(--tx2);margin-top:2px;}
+.modal-close{width:30px;height:30px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;font-size:16px;color:var(--tx2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.modal-body{overflow-y:auto;padding:1rem 1.25rem 2rem;-webkit-overflow-scrolling:touch;}
+.resp-block{margin-bottom:1rem;padding:12px 14px;background:var(--bg);border-radius:10px;}
+.resp-q{font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;}
+.resp-a{font-size:14px;color:var(--tx);line-height:1.5;}
+.resp-a.num{font-size:22px;font-weight:700;color:var(--cp);}
+.resp-empty{color:var(--tx2);font-style:italic;font-size:13px;}
+.resp-sessions{display:flex;flex-direction:column;gap:10px;}
+.session-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;}
+.session-date{font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;}
+.filter-row2{display:flex;gap:8px;margin-top:8px;align-items:flex-end;}
+.date-wrap{flex:1;min-width:0;}
+.fdate{width:100%;padding:8px 10px;border:1px solid rgba(255,255,255,.25);border-radius:9px;background:rgba(255,255,255,.95);color:var(--tx);font-size:12.5px;font-family:var(--font);cursor:pointer;}
+.fdate:focus{outline:none;border-color:rgba(255,255,255,.6);}
+.date-sep{color:rgba(255,255,255,.7);font-size:13px;padding-bottom:8px;flex-shrink:0;}
+.quick-btns{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;}
+.qbtn{padding:4px 9px;border:1px solid rgba(255,255,255,.3);border-radius:20px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.9);font-size:11px;cursor:pointer;font-family:var(--font);white-space:nowrap;}
+.qbtn:hover{background:rgba(255,255,255,.25);}
+.qbtn.on{background:#fff;color:#e91e63;font-weight:700;border-color:transparent;}
+</style>
+</head>
+<body>
+
+<!-- CONFIG SCREEN -->
+<div id="sc" class="screen active">
+  <div class="logo-wrap">
+    <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+  </div>
+  <div class="cfg-box">
+    <h1>Dashboard Phản Hồi</h1>
+    <p class="cfg-desc">Kết nối Google Sheet từ Google Form — tự động phân tích và hiển thị biểu đồ</p>
+    <label class="fl" for="url-in">Link Google Sheet</label>
+    <input id="url-in" class="fi" type="text" placeholder="https://docs.google.com/spreadsheets/d/…" />
+    <label class="fl" for="ttl-in">Tên dashboard <span style="font-weight:400;text-transform:none;letter-spacing:0">(tuỳ chọn)</span></label>
+    <input id="ttl-in" class="fi" type="text" placeholder="VD: Khảo sát nhân viên Quý 2" />
+    <button class="btn-main" onclick="connect()">Kết nối &amp; Xem Dashboard</button>
+    <div id="err" class="err"></div>
+    <div class="hint"><strong>Yêu cầu:</strong> Sheet phải chia sẻ <strong>"Anyone with the link can view"</strong><br>(Share → General access → Anyone with the link → Viewer)</div>
+  </div>
+</div>
+
+<!-- LOADING SCREEN -->
+<div id="sl" class="screen">
+  <div class="spin"></div><p class="ltxt">Đang tải dữ liệu…</p>
+</div>
+
+<!-- DASHBOARD SCREEN -->
+<div id="sd" class="screen">
+  <div class="sticky-top">
+    <!-- Header -->
+    <div class="hdr">
+      <div class="hdr-row">
+        <div style="min-width:0">
+          <h2 id="d-title">Dashboard</h2>
+          <div class="hsub" id="d-sub"></div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn-hdr" onclick="refreshData()">&#8635; Làm mới</button>
+          <button class="btn-hdr" onclick="goConfig()">&#9881;</button>
+        </div>
+      </div>
+    </div>
+    <!-- Filter Bar -->
+    <div class="filter-bar" id="filter-bar">
+      <div class="filter-row">
+        <div class="filter-wrap">
+          <div class="filter-lbl">Phòng khám</div>
+          <select class="fsel" id="fsel-pk" onchange="onPkChange()">
+            <option value="">Tất cả phòng khám</option>
+          </select>
+        </div>
+        <div class="filter-badge" id="filter-badge">0</div>
+        <button class="btn-clear" id="btn-clear" onclick="clearFilters()">&#10005; Xóa</button>
+      </div>
+      <div class="filter-row2" id="date-row" style="display:none">
+        <div class="date-wrap">
+          <div class="filter-lbl">Từ ngày</div>
+          <input type="date" class="fdate" id="fdate-from" onchange="onDateChange()"/>
+        </div>
+        <div class="date-sep">—</div>
+        <div class="date-wrap">
+          <div class="filter-lbl">Đến ngày</div>
+          <input type="date" class="fdate" id="fdate-to" onchange="onDateChange()"/>
+        </div>
+      </div>
+      <div class="quick-btns" id="quick-btns" style="display:none">
+        <button class="qbtn" id="qb-1" onclick="setQuick(1)">Hôm nay</button>
+        <button class="qbtn" id="qb-7" onclick="setQuick(7)">7 ngày</button>
+        <button class="qbtn" id="qb-21" onclick="setQuick(21)">21 ngày</button>
+        <button class="qbtn" id="qb-60" onclick="setQuick(60)">60 ngày</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOCTOR MODAL -->
+  <div class="modal-overlay" id="bs-modal" onclick="closeModal(event)">
+    <div class="modal-sheet">
+      <div class="modal-hdr">
+        <div>
+          <div class="modal-title" id="modal-name"></div>
+          <div class="modal-sub" id="modal-sub"></div>
+        </div>
+        <button class="modal-close" onclick="closeModalBtn()">&#10005;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <div class="dbody">
+    <p class="sec-lbl">Tổng quan</p>
+    <div class="stats-row" id="stats-row"></div>
+    <div id="chart-container"></div>
+    <div id="bs-section"></div>
+    <p class="sec-lbl" style="margin-top:1.25rem">Chi tiết câu hỏi</p>
+    <div id="q-container"></div>
+    <div class="footer">Cập nhật: <span id="last-upd"></span> &nbsp;&middot;&nbsp; <span id="sheet-link-wrap"></span></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script>
+var sheetId=null, dashTitle='Dashboard', tlChart=null;
+var allRows=[], allFields=[], pkField=null, tsField=null, bsField=null;
+var caKhamField=null, tvField=null, dyField=null;
+var activeQuick=0;
+
+/* ── SCREENS ── */
+function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});document.getElementById(id).classList.add('active');}
+function goConfig(){show('sc');}
+function parseNum(s){return parseFloat(String(s||'0').replace(/[^0-9.]/g,''))||0;}
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function extractId(url){var m=url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);return m?m[1]:null;}
+
+/* ── CONNECT ── */
+function connect(){
+  var url=document.getElementById('url-in').value.trim();
+  var ttl=document.getElementById('ttl-in').value.trim();
+  var errEl=document.getElementById('err');errEl.classList.remove('on');
+  if(!url){errEl.textContent='Vui lòng nhập link Google Sheet.';errEl.classList.add('on');return;}
+  var id=extractId(url);
+  if(!id){errEl.textContent='Link không hợp lệ.';errEl.classList.add('on');return;}
+  sheetId=id; dashTitle=ttl||'Dashboard Phản Hồi';
+  try{localStorage.setItem('_fb_sid',id);localStorage.setItem('_fb_ttl',dashTitle);}catch(e){}
+  loadAndRender();
+}
+function refreshData(){if(sheetId)loadAndRender();}
+
+/* ── JSONP FETCH ── */
+function fetchGviz(id){
+  return new Promise(function(resolve,reject){
+    var cb='_gviz_'+Date.now();
+    var script=document.createElement('script');
+    var timer=setTimeout(function(){cleanup();reject(new Error('Timeout — kiểm tra sheet đã chia sẻ "Anyone with link can view" chưa'));},12000);
+    function cleanup(){clearTimeout(timer);try{delete window[cb];}catch(e){}if(script.parentNode)script.parentNode.removeChild(script);}
+    window[cb]=function(data){cleanup();resolve(data);};
+    script.onerror=function(){cleanup();reject(new Error('Không tải được dữ liệu. Đảm bảo sheet đã chia sẻ "Anyone with the link can view".'));};
+    script.src='https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json;responseHandler:'+cb;
+    document.head.appendChild(script);
+  });
+}
+
+/* ── PARSE GVIZ ── */
+function extractCell(cell,colMeta){
+  if(!cell||cell.v===null||cell.v===undefined)return'';
+  if(cell.f!==undefined&&cell.f!==null)return String(cell.f);
+  var v=cell.v;
+  if(typeof v==='string'&&v.indexOf('Date(')===0){var m=v.match(/Date\((\d+),(\d+),(\d+)/);if(m){var d=new Date(+m[1],+m[2],+m[3]);return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();}}
+  return String(v);
+}
+function parseGviz(data){
+  var tbl=data.table;if(!tbl)throw new Error('Dữ liệu không hợp lệ');
+  var headers=tbl.cols.map(function(c){return(c.label||c.id||'').trim();}).filter(function(h){return h!=='';});
+  var numCols=headers.length;
+  var rows=(tbl.rows||[]).map(function(row){
+    var rec={};var cells=row.c||[];
+    for(var i=0;i<numCols;i++){rec[headers[i]]=extractCell(cells[i],tbl.cols[i]);}
+    return rec;
+  }).filter(function(r){return Object.values(r).some(function(v){return v!=='';});});
+  return{data:rows,fields:headers};
+}
+
+/* ── LOAD ── */
+function loadAndRender(){
+  show('sl');
+  fetchGviz(sheetId).then(function(gvizData){
+    var result=parseGviz(gvizData);
+    if(!result.data||result.data.length===0)throw new Error('Sheet trống hoặc không có dữ liệu.');
+    allRows=result.data; allFields=result.fields;
+    tsField=allFields.find(function(f){var n=normStr(f);return n.indexOf('timestamp')>=0||n.indexOf('thoi gian')>=0||n.indexOf('ngay lam viec')>=0||n.indexOf('ngay lv')>=0;});
+    bsField=allFields.find(function(f){var n=normStr(f);return n.indexOf('bac si')>=0||n.indexOf('bac sy')>=0||n.indexOf('ten bs')>=0||(n.indexOf('bs')===0);});
+    initFilters();
+    applyFilters();
+    show('sd');
+  }).catch(function(e){
+    show('sc');
+    var errEl=document.getElementById('err');
+    errEl.textContent='Lỗi: '+e.message; errEl.classList.add('on');
+  });
+}
+
+/* ── DETECT FILTER COLUMNS ── */
+function normStr(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/\s+/g,' ').trim();}
+
+function detectFilterFields(fields){
+  var pkKeywords=['phong kham','pk','co so','chi nhanh','clinic','branch','don vi'];
+  pkField=null;
+  fields.forEach(function(f){
+    var n=normStr(f);
+    if(!pkField&&pkKeywords.some(function(k){return n.indexOf(k)>=0;}))pkField=f;
+  });
+}
+
+/* ── INIT FILTERS ── */
+function initFilters(){
+  detectFilterFields(allFields);
+  var bar=document.getElementById('filter-bar');
+  var pkSel=document.getElementById('fsel-pk');
+
+  if(!pkField&&!tsField){bar.style.display='none';return;}
+  bar.style.display='block';
+
+  // Show date row if timestamp column found
+  var dateRow=document.getElementById('date-row');
+  var quickBtns=document.getElementById('quick-btns');
+  if(tsField){
+    dateRow.style.display='flex';
+    quickBtns.style.display='flex';
+    // Set default: last 30 days
+    var today=new Date();
+    document.getElementById('fdate-to').value=toInputDate(today);
+    document.getElementById('fdate-from').value=toInputDate(today);
+    activeQuick=1;
+    updateQuickBtns();
+  } else {
+    dateRow.style.display='none';
+    quickBtns.style.display='none';
+  }
+
+  // Populate Phòng khám
+  pkSel.innerHTML='<option value="">Tất cả phòng khám</option>';
+  if(pkField){
+    var pks=[...new Set(allRows.map(function(r){return(r[pkField]||'').trim();}).filter(Boolean))].sort();
+    pks.forEach(function(pk){var o=document.createElement('option');o.value=pk;o.textContent=pk;pkSel.appendChild(o);});
+    document.querySelector('#fsel-pk').closest('.filter-wrap').querySelector('.filter-lbl').textContent=pkField;
+  } else {
+    pkSel.disabled=true;
+    pkSel.options[0].textContent='Không có dữ liệu';
+  }
+
+
+}
+
+/* ── PK CHANGE ── */
+function onPkChange(){ applyFilters(); }
+
+/* ── APPLY FILTERS ── */
+function toInputDate(d){var y=d.getFullYear();var m=String(d.getMonth()+1).padStart(2,'0');var day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
+function fromInputDate(s){if(!s)return null;var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function updateQuickBtns(){
+  [1,7,21,60].forEach(function(n){
+    var el=document.getElementById('qb-'+n);
+    if(el)el.className='qbtn'+(activeQuick===n?' on':'');
+  });
+}
+function setQuick(days){
+  activeQuick=days;
+  var today=new Date();
+  var toEl=document.getElementById('fdate-to');
+  var fromEl=document.getElementById('fdate-from');
+  toEl.value=toInputDate(today);
+  if(days===1){fromEl.value=toInputDate(today);}
+  else{fromEl.value=toInputDate(new Date(today-(days-1)*864e5));}
+  updateQuickBtns();
+  applyFilters();
+}
+function onDateChange(){
+  activeQuick=-1; // custom
+  updateQuickBtns();
+  applyFilters();
+}
+function applyFilters(){
+  var pkVal=(document.getElementById('fsel-pk')||{}).value||'';
+  var fromVal=(document.getElementById('fdate-from')||{}).value||'';
+  var toVal=(document.getElementById('fdate-to')||{}).value||'';
+  var fromDate=fromInputDate(fromVal);
+  var toDate=toVal?new Date(fromInputDate(toVal).getTime()+864e5-1):null; // end of day
+
+  var filtered=allRows.filter(function(r){
+    var pkOk=!pkField||!pkVal||(r[pkField]||'').trim()===pkVal;
+    var dateOk=true;
+    if(tsField&&(fromDate||toDate)){
+      var rd=parseDateStr(r[tsField]);
+      if(rd){
+        if(fromDate&&rd<fromDate)dateOk=false;
+        if(toDate&&rd>toDate)dateOk=false;
+      } else { dateOk=false; }
+    }
+    return pkOk&&dateOk;
+  });
+
+  // Update badge + clear button
+  var hasDate=tsField&&(fromVal||toVal);
+  var activeCount=(pkVal?1:0)+(hasDate?1:0);
+  var badge=document.getElementById('filter-badge');
+  var clearBtn=document.getElementById('btn-clear');
+  badge.textContent=activeCount;
+  badge.className='filter-badge'+(activeCount>0?' on':'');
+  clearBtn.className='btn-clear'+(activeCount>0?' on':'');
+
+  render(filtered, allFields);
+}
+
+/* ── CLEAR FILTERS ── */
+function clearFilters(){
+  document.getElementById('fsel-pk').value='';
+  applyFilters();
+  if(tsField){
+    document.getElementById('fdate-from').value='';
+    document.getElementById('fdate-to').value='';
+    activeQuick=0;
+    updateQuickBtns();
+  }
+  applyFilters();
+}
+
+/* ── DETECT COLUMN TYPE ── */
+function detectType(vals){
+  var ne=vals.filter(function(v){return v&&v.trim()!=='';});
+  if(ne.length===0)return'empty';
+  if(/^\d{1,2}\/\d{1,2}\/\d{4}/.test(ne[0]))return'timestamp';
+  var nums=ne.map(function(v){return parseFloat(v.replace(',','.'));});
+  if(nums.every(function(n){return!isNaN(n)&&isFinite(n);})){
+    var uniq=[...new Set(ne)];return uniq.length<=10?'rating':'numeric';
+  }
+  var hasComma=ne.filter(function(v){return v.indexOf(',')>=0;}).length;
+  if(hasComma>ne.length*0.3){var avgW=ne.reduce(function(a,v){return a+v.split(' ').length;},0)/ne.length;if(avgW<12)return'multiselect';}
+  var uniq2=[...new Set(ne)];
+  if(uniq2.length<=25&&uniq2.length/ne.length<0.55)return'categorical';
+  return'text';
+}
+
+/* ── PARSE DATE ── */
+function parseDateStr(str){
+  if(!str)return null;
+  var m=str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(!m)return null;
+  var day=+m[1],month=+m[2],year=+m[3];
+  if(month>12){var tmp=day;day=month;month=tmp;}
+  return new Date(year,month-1,day);
+}
+
+/* ── MAIN RENDER ── */
+function render(rows, fields){
+  document.getElementById('d-title').textContent=dashTitle;
+  document.getElementById('last-upd').textContent=new Date().toLocaleString('vi-VN',{dateStyle:'short',timeStyle:'short'});
+  var lw=document.getElementById('sheet-link-wrap');
+  lw.innerHTML=sheetId?'<a href="https://docs.google.com/spreadsheets/d/'+sheetId+'" target="_blank" style="color:var(--cp);text-decoration:none">Mở Sheet ↗</a>':'';
+
+  var total=rows.length;
+  var isFiltered=rows.length<allRows.length;
+
+  // Use global tsField
+  var dataFields=fields.filter(function(f){if(!f||f===tsField||f===pkField||f===bsField||f===caKhamField||f===tvField||f===dyField)return false; var n=normStr(f); return n.indexOf('cham cong')<0&&n.indexOf('ma nhan vien')<0&&n.indexOf('ngay lam viec')<0&&n.indexOf('timestamp')<0&&n.indexOf('thoi gian')<0;});
+
+  // Stats
+  // DEBUG: log normalized field names to console
+  console.log('=== FIELDS ===');
+  fields.forEach(function(f){console.log(JSON.stringify(f),'→',normStr(f));});
+
+  // Detect special columns — broad matching
+  caKhamField=fields.find(function(f){
+    var n=normStr(f);
+    return n.indexOf('tong so ca kham')>=0||n.indexOf('tong ca kham')>=0||n==='tong so ca kham:';
+  });
+  tvField=fields.find(function(f){
+    var n=normStr(f);
+    return n.indexOf('tu van')>=0;
+  });
+  dyField=fields.find(function(f){
+    var n=normStr(f);
+    return n.indexOf('dong y')>=0;
+  });
+  console.log('caKhamField:',caKhamField,'tvField:',tvField,'dyField:',dyField);
+  console.log('caKhamField:',caKhamField,'| tvField:',tvField,'| dyField:',dyField);
+
+  var sumCaKham=0,sumTV=0,sumDY=0;
+  if(caKhamField)rows.forEach(function(r){sumCaKham+=parseNum(r[caKhamField]);});
+  if(tvField)rows.forEach(function(r){sumTV+=parseNum(r[tvField]);});
+  if(dyField)rows.forEach(function(r){sumDY+=parseNum(r[dyField]);});
+  console.log('sumCaKham:',sumCaKham,'sumTV:',sumTV,'sumDY:',sumDY);
+  var ratePct=sumTV>0?Math.round(sumDY/sumTV*100):0;
+
+  var caKhamVal=caKhamField?sumCaKham:total;
+  var sHtml='<div class="scard'+(isFiltered?' active':'')+'"><div class="scard-lbl">Tổng số ca khám</div><div class="scard-val">'+caKhamVal+'</div></div>';
+  if(tvField){
+    sHtml+='<div class="scard"><div class="scard-lbl">Ca có tư vấn thêm</div><div class="scard-val">'+sumTV+'</div></div>';
+    sHtml+='<div class="scard"><div class="scard-lbl">Ca đồng ý</div><div class="scard-val">'+sumDY+'</div></div>';
+    sHtml+='<div class="scard" style="border-color:var(--acc);background:var(--acc-bg)"><div class="scard-lbl" style="color:#c0134e">Tỉ lệ đồng ý</div><div class="scard-val" style="color:#c0134e">'+ratePct+'%</div></div>';
+  } else {
+    sHtml+='<div class="scard"><div class="scard-lbl">Số câu hỏi</div><div class="scard-val">'+dataFields.length+'</div></div>';
+  }
+
+  document.getElementById('stats-row').innerHTML=sHtml;
+
+  // Subtitle
+  var pkVal=(document.getElementById('fsel-pk')||{}).value||'';
+  var subParts=[total+' phản hồi'];
+  if(pkVal)subParts.push(pkVal);
+  document.getElementById('d-sub').textContent=subParts.join(' · ');
+
+  // Destroy old chart
+  if(tlChart){tlChart.destroy();tlChart=null;}
+
+  var qc=document.getElementById('q-container');
+  qc.innerHTML='';
+  var cc=document.getElementById('chart-container');
+  cc.innerHTML='';
+
+  // Render doctor list
+  if(rows.length===0){
+    qc.innerHTML='<div class="empty-filter">Không có dữ liệu phù hợp với bộ lọc đã chọn.<br><br><button onclick="clearFilters()" style="background:var(--cp);color:white;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px">Xóa bộ lọc</button></div>';
+    return;
+  }
+
+  // Timeline
+  if(tsField)renderTimeline(rows,cc);
+  renderDoctorList(rows, dataFields);
+
+  // Each question
+  dataFields.forEach(function(field,idx){
+    var vals=rows.map(function(r){return(r[field]||'').trim();});
+    var type=detectType(vals);if(type==='empty')return;
+    var ne=vals.filter(function(v){return v!=='';});
+    var pct=Math.round(ne.length/total*100);
+    var card=document.createElement('div');card.className='qc';
+    card.innerHTML='<div class="qt">'+escH(field)+'</div><div class="qm">'+ne.length+' phản hồi · '+pct+'% điền</div><div id="qb'+idx+'"></div>';
+    qc.appendChild(card);var body=card.querySelector('#qb'+idx);
+    if(type==='categorical'||type==='rating')renderCat(ne,body);
+    else if(type==='multiselect')renderMulti(ne,body);
+    else if(type==='numeric')renderNum(ne,body);
+    else renderTxt(ne,body);
+  });
+}
+
+/* ── TIMELINE ── */
+function renderTimeline(rows,parent){
+  if(!rows||rows.length===0)return;
+  // Build date counts from filtered rows
+  var counts={};
+  rows.forEach(function(r){
+    var d=parseDateStr(r[tsField]);
+    if(!d)return;
+    var key=String(d.getDate()).padStart(2,'0')+'/'+(String(d.getMonth()+1).padStart(2,'0'));
+    counts[key]=(counts[key]||0)+1;
+  });
+  var entries=Object.entries(counts);
+  if(entries.length===0)return;
+
+  // Sort entries by date
+  entries.sort(function(a,b){
+    var pa=a[0].split('/'),pb=b[0].split('/');
+    return new Date(2026,+pa[1]-1,+pa[0])-new Date(2026,+pb[1]-1,+pb[0]);
+  });
+
+  // Determine label
+  var rangeLabel=entries.length===1?entries[0][0]:entries[0][0]+' – '+entries[entries.length-1][0];
+
+  var card=document.createElement('div');card.className='qc';
+  card.innerHTML='<div class="qt">Số lượng Bác sĩ tham gia phản hồi</div><div class="qm">'+rangeLabel+' · '+rows.length+' ca</div><div style="position:relative;width:100%;height:120px"><canvas id="tlc" role="img" aria-label="Biểu đồ bác sĩ phản hồi theo ngày">Số bác sĩ phản hồi theo ngày.</canvas></div>';
+  parent.appendChild(card);
+
+  setTimeout(function(){
+    var el=document.getElementById('tlc');if(!el)return;
+    Chart.register(ChartDataLabels);
+    tlChart=new Chart(el,{
+      type:'bar',
+      data:{
+        labels:entries.map(function(e){return e[0];}),
+        datasets:[{
+          data:entries.map(function(e){return e[1];}),
+          backgroundColor:'#00a3b4',
+          borderRadius:5,
+          borderSkipped:false,
+          maxBarThickness:40
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:function(i){return i.raw+' ca khám';}}},
+          datalabels:{
+            anchor:'end',align:'end',
+            color:'#162119',
+            font:{size:12,weight:'600'},
+            formatter:function(v){return v;}
+          }
+        },
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:11},maxRotation:0,autoSkip:true,maxTicksLimit:14}},
+          y:{grid:{color:'#e0ece7'},ticks:{font:{size:11},stepSize:1},beginAtZero:true}
+        },
+        layout:{padding:{top:20}}
+      }
+    });
+  },100);
+}
+
+/* ── CATEGORICAL ── */
+function renderCat(vals,container){
+  var counts={};vals.forEach(function(v){counts[v]=(counts[v]||0)+1;});
+  var sorted=Object.entries(counts).sort(function(a,b){return b[1]-a[1];});
+  var total=vals.length;
+  var allNums=sorted.every(function(e){return!isNaN(parseFloat(e[0]));});
+  if(allNums&&sorted.length<=10){
+    var avg=vals.reduce(function(a,v){return a+parseFloat(v);},0)/vals.length;
+    var maxV=Math.max.apply(null,vals.map(function(v){return parseFloat(v);}));
+    container.innerHTML='<div class="rat-big"><span class="rat-n">'+avg.toFixed(1)+'</span><span class="rat-d">/ '+maxV+'</span></div>';
+    var sub=document.createElement('div');container.appendChild(sub);
+    renderBars(sorted.sort(function(a,b){return parseFloat(a[0])-parseFloat(b[0]);}),total,sub);return;
+  }
+  renderBars(sorted,total,container);
+}
+function renderBars(sorted,total,container){
+  var html=sorted.map(function(e){var pct=Math.round(e[1]/total*100);return'<div><div class="hb-top"><span style="flex:1;min-width:0;word-break:break-word">'+escH(e[0])+'</span><span class="hb-cnt">'+e[1]+' · '+pct+'%</span></div><div class="hb-tr"><div class="hb-fi" style="width:'+pct+'%"></div></div></div>';}).join('');
+  container.innerHTML='<div class="hbars">'+html+'</div>';
+}
+
+/* ── MULTI-SELECT ── */
+function renderMulti(vals,container){
+  var counts={};
+  vals.forEach(function(v){v.split(',').map(function(s){return s.trim();}).filter(Boolean).forEach(function(opt){counts[opt]=(counts[opt]||0)+1;});});
+  var sorted=Object.entries(counts).sort(function(a,b){return b[1]-a[1];});
+  var maxC=sorted[0]?sorted[0][1]:1;
+  var html=sorted.map(function(e){var bp=Math.round(e[1]/maxC*100);var sp=Math.round(e[1]/vals.length*100);return'<div><div class="hb-top"><span style="flex:1;min-width:0;word-break:break-word">'+escH(e[0])+'</span><span class="hb-cnt">'+e[1]+' · '+sp+'%</span></div><div class="hb-tr"><div class="hb-fi" style="width:'+bp+'%"></div></div></div>';}).join('');
+  container.innerHTML='<div class="hbars">'+html+'<p class="note">* % tính trên tổng người trả lời</p></div>';
+}
+
+/* ── NUMERIC ── */
+function renderNum(vals,container){
+  var nums=vals.map(function(v){return parseFloat(v);}).filter(function(n){return!isNaN(n);});
+  if(!nums.length){container.innerHTML='<div style="font-size:13px;color:var(--tx2);text-align:center;padding:1rem;background:var(--bg);border-radius:8px">Không có dữ liệu</div>';return;}
+  var avg=nums.reduce(function(a,b){return a+b;},0)/nums.length;
+  var mn=Math.min.apply(null,nums),mx=Math.max.apply(null,nums);
+  var sum=nums.reduce(function(a,b){return a+b;},0);
+  container.innerHTML='<div class="inline-stats"><div class="scard"><div class="scard-lbl">Trung bình</div><div class="scard-val" style="font-size:22px">'+avg.toFixed(1)+'</div></div><div class="scard"><div class="scard-lbl">Tổng</div><div class="scard-val" style="font-size:22px">'+sum.toLocaleString('vi-VN')+'</div></div><div class="scard"><div class="scard-lbl">Nhỏ nhất</div><div class="scard-val" style="font-size:22px">'+mn+'</div></div><div class="scard"><div class="scard-lbl">Lớn nhất</div><div class="scard-val" style="font-size:22px">'+mx+'</div></div></div>';
+}
+
+/* ── TEXT ── */
+function renderTxt(vals,container,lim){
+  lim=lim||5;
+  container.innerHTML='<div class="tx-list">'+vals.slice(0,lim).map(function(v){return'<div class="tx-item">'+escH(v)+'</div>';}).join('')+'</div>';
+  if(vals.length>lim){var btn=document.createElement('button');btn.className='show-more';btn.textContent='Xem thêm '+(vals.length-lim)+' phản hồi';btn.onclick=function(){renderTxt(vals,container,vals.length);};container.appendChild(btn);}
+}
+
+/* ── AUTO-RESTORE ── */
+/* ── DOCTOR LIST ── */
+function renderDoctorList(rows, dataFields){
+  var sec=document.getElementById('bs-section');
+  sec.innerHTML='';
+  if(!bsField||rows.length===0)return;
+
+  // Group rows by doctor
+  var groups={};
+  rows.forEach(function(r){
+    var name=(r[bsField]||'').trim();
+    if(!name)name='(Chưa điền)';
+    if(!groups[name])groups[name]=[];
+    groups[name].push(r);
+  });
+
+  var doctors=Object.keys(groups).sort();
+  var wrap=document.createElement('div');
+  wrap.innerHTML='<p class="sec-lbl" style="margin-top:1.5rem">Xem theo Bác sĩ</p>';
+  var grid=document.createElement('div');
+  grid.className='bs-grid';
+
+  doctors.forEach(function(name){
+    var sessions=groups[name];
+    var totalCa=0;
+    if(caKhamField)sessions.forEach(function(r){totalCa+=parseNum(r[caKhamField]);});
+    var card=document.createElement('div');
+    card.className='bs-card';
+    card.innerHTML='<div><div class="bs-name">'+escH(name)+'</div><div class="bs-meta">'+sessions.length+' phiên · '+(caKhamField?totalCa+' ca khám':'')+' </div></div><span class="bs-arrow">›</span>';
+    card.onclick=function(){openModal(name,sessions,dataFields);};
+    grid.appendChild(card);
+  });
+
+  wrap.appendChild(grid);
+  sec.appendChild(wrap);
+}
+
+/* ── MODAL ── */
+function openModal(name, sessions, dataFields){
+  document.getElementById('modal-name').textContent=name;
+  var totalCa=0;
+  if(caKhamField)sessions.forEach(function(r){totalCa+=parseNum(r[caKhamField]);});
+  document.getElementById('modal-sub').textContent=sessions.length+' phiên làm việc'+(caKhamField?' · '+totalCa+' ca khám':'');
+
+  var body=document.getElementById('modal-body');
+  body.innerHTML='';
+
+  var allQFields=dataFields.filter(function(f){return f!==bsField&&f!==pkField&&f!==tsField;});
+
+  // Each session = one row
+  var sessWrap=document.createElement('div');
+  sessWrap.className='resp-sessions';
+
+  // Sort sessions by date descending (newest first)
+  var sorted=sessions.slice().sort(function(a,b){
+    var da=parseDateStr((a[tsField]||''));
+    var db=parseDateStr((b[tsField]||''));
+    if(!da&&!db)return 0;
+    if(!da)return 1;
+    if(!db)return -1;
+    return db-da;
+  });
+
+  sorted.forEach(function(row, si){
+    var dateStr=tsField?(row[tsField]||''):'';
+    var card=document.createElement('div');
+    card.className='session-card';
+    var dateLabel=dateStr?('<div class="session-date">'+escH(dateStr)+(pkField&&row[pkField]?' · '+escH(row[pkField]):'')+'</div>'):'';
+    var fieldsHtml='';
+
+    // Summary numbers first
+    var numFields=[caKhamField,tvField,dyField].filter(Boolean);
+    if(numFields.length){
+      fieldsHtml+='<div style="display:grid;grid-template-columns:repeat('+numFields.length+',1fr);gap:8px;margin-bottom:10px">';
+      numFields.forEach(function(f){
+        var val=(row[f]||'0').trim();
+        fieldsHtml+='<div style="background:var(--cp-bg);border-radius:8px;padding:8px 10px;border-left:3px solid var(--cp)"><div style="font-size:10px;color:var(--cp-dk);font-weight:700;margin-bottom:3px">'+escH(f.replace(/^\*/,'').replace(/:$/,'').trim())+'</div><div style="font-size:20px;font-weight:700;color:var(--cp-dk)">'+escH(val)+'</div></div>';
+      });
+      fieldsHtml+='</div>';
+    }
+
+    // Other question fields
+    allQFields.filter(function(f){return numFields.indexOf(f)<0;}).forEach(function(f){
+      var val=(row[f]||'').trim();
+      fieldsHtml+='<div class="resp-block"><div class="resp-q">'+escH(f.replace(/^\*/,'').replace(/:$/,'').trim())+'</div>';
+      if(!val){fieldsHtml+='<div class="resp-empty">Chưa điền</div>';}
+      else{fieldsHtml+='<div class="resp-a">'+escH(val)+'</div>';}
+      fieldsHtml+='</div>';
+    });
+
+    card.innerHTML=dateLabel+fieldsHtml;
+    sessWrap.appendChild(card);
+  });
+
+  body.appendChild(sessWrap);
+  document.getElementById('bs-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(e){
+  if(e.target===document.getElementById('bs-modal'))closeModalBtn();
+}
+function closeModalBtn(){
+  document.getElementById('bs-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+window.addEventListener('DOMContentLoaded',function(){
+  sheetId='1TUro9tRgF9v_peLT9dDkyn2-90iEhM5Bu4n_r2NWOms';
+  dashTitle='UPSELL ÁI NGHĨA';
+  loadAndRender();
+});
+</script>
+</body>
+</html>
