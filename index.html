@@ -551,6 +551,10 @@ function render(rows, fields){
   // Render doctor list
   if(rows.length===0){
     qc.innerHTML='<div class="empty-filter">Không có dữ liệu phù hợp với bộ lọc đã chọn.<br><br><button onclick="clearFilters()" style="background:var(--cp);color:white;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px">Xóa bộ lọc</button></div>';
+    // Clear all other sections too
+    cc.innerHTML='';
+    document.getElementById('stats-section').innerHTML='';
+    document.getElementById('bs-section').innerHTML='';
     return;
   }
 
